@@ -21,8 +21,8 @@ class Connect {
 
 		return add_query_arg(
 			array(
-				'store_url' => rawurlencode( $store_url ),
-				'nonce'     => rawurlencode( $nonce ),
+				'store_url' => $store_url,
+				'nonce'     => $nonce,
 			),
 			PRINTEERS_DASHBOARD_URL . '/woocommerce/connect'
 		);
