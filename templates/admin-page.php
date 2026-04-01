@@ -19,12 +19,11 @@
 			<a href="<?php echo esc_url( $dashboard_url ); ?>" target="_blank">Printeers Dashboard</a>.
 		</p>
 
-		<h2>Disconnect</h2>
-		<p>Disconnecting will remove the API credentials from this site. Products created by Printeers will remain.</p>
 		<form method="post">
 			<?php echo $nonce_field; ?>
-			<button type="submit" name="printeers_disconnect" class="button button-secondary">
-				Disconnect from Printeers
+			<button type="submit" name="printeers_disconnect" class="printeers-text-button">
+				<span class="dashicons dashicons-dismiss"></span>
+				Disconnect
 			</button>
 		</form>
 

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;500;600;700&display=swap');
 
 :root {
 	--printeers-vibrant-blue: #2E1195;
@@ -14,20 +14,22 @@
 }
 
 .printeers-admin h1 {
-	font-size: 28px;
-	font-weight: 700;
+	font-size: 42px;
+	font-weight: 200;
 	color: var(--printeers-vibrant-blue);
+	letter-spacing: -0.5px;
 }
 
 .printeers-admin h2 {
 	font-size: 20px;
-	font-weight: 600;
-	color: var(--printeers-vibrant-blue);
+	font-weight: 700;
+	color: var(--printeers-magic-magenta);
 	margin-top: 32px;
 }
 
 .printeers-admin p {
-	font-size: 14px;
+	font-size: 18px;
+	font-weight: 300;
 	line-height: 1.6;
 	color: var(--printeers-vibrant-blue);
 }
@@ -37,7 +39,8 @@
 	color: var(--printeers-vibrant-blue);
 	padding: 2px 8px;
 	border-radius: 4px;
-	font-size: 13px;
+	font-size: 14px;
+	font-weight: 300;
 }
 
 /* Status banner */
@@ -97,27 +100,32 @@
 	box-shadow: none;
 }
 
-/* Secondary button (Disconnect) */
-.printeers-admin .button-secondary {
+/* Disconnect text button */
+.printeers-admin .printeers-text-button {
 	font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-	border: 1px solid var(--printeers-vibrant-blue);
-	border-radius: 30px;
-	color: var(--printeers-vibrant-blue);
-	background: transparent;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: none;
+	border: none;
+	color: var(--printeers-electric-cyan);
 	font-size: 14px;
-	font-weight: 500;
-	padding: 8px 24px;
-	height: auto;
-	line-height: 1.4;
+	font-weight: 700;
+	padding: 4px 0;
 	cursor: pointer;
-	transition: all 0.15s ease;
+	transition: color 0.15s ease;
 }
 
-.printeers-admin .button-secondary:hover,
-.printeers-admin .button-secondary:focus {
-	background: var(--printeers-vibrant-blue);
-	color: #fff;
-	border-color: var(--printeers-vibrant-blue);
+.printeers-admin .printeers-text-button:hover,
+.printeers-admin .printeers-text-button:focus {
+	color: var(--printeers-vibrant-blue);
+}
+
+.printeers-admin .printeers-text-button .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+	line-height: 16px;
 }
 
 /* Links */

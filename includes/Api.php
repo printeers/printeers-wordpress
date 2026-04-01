@@ -53,11 +53,16 @@ class Api {
 			);
 		}
 
-		// Redirect to the admin page to show the connected state.
+		// Redirect to the Printeers Dashboard to create a store.
+		$store_url = home_url();
+		$redirect  = PRINTEERS_DASHBOARD_URL . '/settings/stores/create?' . http_build_query( array(
+			'woocommerce_store_url' => $store_url,
+		) );
+
 		return new \WP_REST_Response(
 			null,
 			302,
-			array( 'Location' => admin_url( 'admin.php?page=printeers&connected=1' ) )
+			array( 'Location' => $redirect )
 		);
 	}
 }
