@@ -92,8 +92,17 @@ class Connect {
 		$consumer_key    = 'ck_' . bin2hex( random_bytes( 20 ) );
 		$consumer_secret = 'cs_' . bin2hex( random_bytes( 20 ) );
 
+		// Use the first administrator user. We can't use get_current_user_id()
+		// because this runs during a REST callback with no WordPress session.
+		// The API key's user determines WooCommerce REST API capabilities —
+		// an admin user is required for webhook management.
+		$admins = get_users( array( 'role' => 'administrator', 'number' => 1, 'orderby' => 'ID', 'order' => 'ASC' ) );
+		if ( empty( $admins ) ) {
+			return new \WP_Error( 'printeers_no_admin', 'No administrator user found.' );
+		}
+
 		$data = array(
-			'user_id'         => get_current_user_id(),
+			'user_id'         => $admins[0]->ID,
 			'description'     => 'Printeers',
 			'permissions'     => 'read_write',
 			'consumer_key'    => wc_api_hash( $consumer_key ),
