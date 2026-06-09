@@ -49,7 +49,24 @@ class Admin {
 			return;
 		}
 
-		Connect::disconnect();
+		$result = Connect::disconnect();
+		if ( is_wp_error( $result ) ) {
+			// Keep the detail server-side; the query arg is only a flag so we
+			// don't leak it through browser history/logs or hit URL limits.
+			set_transient(
+				'printeers_disconnect_error_' . get_current_user_id(),
+				$result->get_error_message(),
+				MINUTE_IN_SECONDS
+			);
+			wp_safe_redirect( add_query_arg(
+				array(
+					'page'             => 'printeers',
+					'disconnect_error' => 1,
+				),
+				admin_url( 'admin.php' )
+			) );
+			exit;
+		}
 		wp_safe_redirect( admin_url( 'admin.php?page=printeers&disconnected=1' ) );
 		exit;
 	}
@@ -60,6 +77,15 @@ class Admin {
 		$connect_url   = Connect::get_connect_url();
 		$dashboard_url = PRINTEERS_DASHBOARD_URL;
 		$nonce_field   = wp_nonce_field( 'printeers_disconnect', 'printeers_disconnect_nonce', true, false );
+
+		$disconnect_failed = isset( $_GET['disconnect_error'] );
+		$disconnect_error  = '';
+		if ( $disconnect_failed ) {
+			$transient_key = 'printeers_disconnect_error_' . get_current_user_id();
+			$stored        = get_transient( $transient_key );
+			delete_transient( $transient_key );
+			$disconnect_error = is_string( $stored ) ? $stored : '';
+		}
 
 		include PRINTEERS_PLUGIN_DIR . 'templates/admin-page.php';
 	}
