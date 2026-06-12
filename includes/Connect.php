@@ -63,11 +63,26 @@ class Connect {
 	}
 
 	/**
-	 * Disconnect from Printeers. Removes stored credentials and connection state.
+	 * Disconnect from Printeers. Notifies Printeers first so the store is freed
+	 * for a future reconnect, then removes the local API key and connection
+	 * state. If Printeers can't be reached the local state is left intact so the
+	 * user can retry; otherwise the store would be stuck connected on the
+	 * Printeers side. Returns true on success or a WP_Error on failure.
 	 */
 	public static function disconnect() {
+		$key_id          = (int) get_option( 'printeers_api_key_id', 0 );
+		$consumer_secret = self::get_consumer_secret( $key_id );
+
+		// Only notify when we still have the credential Printeers needs to
+		// authenticate the request; otherwise there is nothing to free remotely.
+		if ( $consumer_secret ) {
+			$result = self::notify_disconnect( get_option( 'printeers_store_url', home_url() ), $consumer_secret );
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+		}
+
 		// Remove the API key we created.
-		$key_id = get_option( 'printeers_api_key_id', 0 );
 		if ( $key_id ) {
 			global $wpdb;
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ) );
@@ -77,6 +92,51 @@ class Connect {
 		delete_option( 'printeers_store_url' );
 		delete_option( 'printeers_api_key_id' );
 		delete_option( 'printeers_connect_nonce' );
+
+		return true;
+	}
+
+	/**
+	 * Read the plaintext consumer secret WooCommerce stored for our API key.
+	 */
+	private static function get_consumer_secret( int $key_id ): string {
+		if ( ! $key_id ) {
+			return '';
+		}
+		global $wpdb;
+		$secret = $wpdb->get_var( $wpdb->prepare(
+			"SELECT consumer_secret FROM {$wpdb->prefix}woocommerce_api_keys WHERE key_id = %d",
+			$key_id
+		) );
+		return is_string( $secret ) ? $secret : '';
+	}
+
+	/**
+	 * Tell the Printeers callback API to mark this store as disconnected.
+	 */
+	private static function notify_disconnect( string $store_url, string $consumer_secret ) {
+		$url = PRINTEERS_CALLBACK_URL . '/woocommerce/disconnect';
+
+		$response = wp_remote_post( $url, array(
+			'timeout' => 30,
+			'headers' => array( 'Content-Type' => 'application/json' ),
+			'body'    => wp_json_encode( array(
+				'store_url'       => $store_url,
+				'consumer_secret' => $consumer_secret,
+			) ),
+		) );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( $code < 200 || $code >= 300 ) {
+			$message = wp_remote_retrieve_response_message( $response );
+			return new \WP_Error( 'printeers_disconnect_error', trim( "Printeers returned HTTP $code $message" ) );
+		}
+
+		return true;
 	}
 
 	private static function generate_nonce(): string {

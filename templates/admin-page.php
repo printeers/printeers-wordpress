@@ -3,6 +3,13 @@
 <div class="wrap printeers-admin">
 	<h1>Printeers</h1>
 
+	<?php if ( ! empty( $disconnect_failed ) ) : ?>
+		<div class="notice notice-error">
+			<p>Could not disconnect from Printeers.<?php if ( '' !== $disconnect_error ) : ?> <?php echo esc_html( $disconnect_error ); ?><?php endif; ?></p>
+			<p>Your store is still connected. Please try again in a moment.</p>
+		</div>
+	<?php endif; ?>
+
 	<?php if ( $connected ) : ?>
 
 		<div class="printeers-status printeers-status--connected">
