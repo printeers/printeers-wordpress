@@ -14,6 +14,11 @@ class Connect {
 	 * authflow, and redirects back to our connect-callback endpoint.
 	 */
 	public static function get_connect_url(): string {
+		// Minted per click (the admin page posts to handle_connect), never on
+		// render: a page view must not have write side effects, and reusing an
+		// abandoned flow's nonce would collide with the authflow the Dashboard
+		// already stored for it. A new flow deliberately supersedes any
+		// in-flight one.
 		$nonce = self::generate_nonce();
 		update_option( 'printeers_connect_nonce', $nonce );
 
