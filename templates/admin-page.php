@@ -26,7 +26,7 @@
 			printf(
 				/* translators: %s: link to the Printeers Dashboard. */
 				esc_html__( 'Manage your store in the %s.', 'printeers' ),
-				'<a href="' . esc_url( $dashboard_url ) . '" target="_blank">' . esc_html__( 'Printeers Dashboard', 'printeers' ) . '</a>'
+				'<a href="' . esc_url( $dashboard_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Printeers Dashboard', 'printeers' ) . '</a>'
 			);
 			?>
 		</p>
