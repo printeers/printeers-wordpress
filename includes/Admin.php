@@ -27,7 +27,7 @@ class Admin {
 			return;
 		}
 
-		// Not wp_safe_redirect: the Dashboard is an external host by design.
+		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- the Dashboard is an external host by design.
 		wp_redirect( Connect::get_connect_url() );
 		exit;
 	}
@@ -91,12 +91,11 @@ class Admin {
 	}
 
 	public static function render_page() {
-		$connected           = get_option( 'printeers_connected', false );
-		$store_url           = get_option( 'printeers_store_url', '' );
-		$dashboard_url       = PRINTEERS_DASHBOARD_URL;
-		$nonce_field         = wp_nonce_field( 'printeers_disconnect', 'printeers_disconnect_nonce', true, false );
-		$connect_nonce_field = wp_nonce_field( 'printeers_connect', 'printeers_connect_nonce', true, false );
+		$connected     = get_option( 'printeers_connected', false );
+		$store_url     = get_option( 'printeers_store_url', '' );
+		$dashboard_url = PRINTEERS_DASHBOARD_URL;
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display-only flag, no state change.
 		$disconnect_failed = isset( $_GET['disconnect_error'] );
 		$disconnect_error  = '';
 		if ( $disconnect_failed ) {

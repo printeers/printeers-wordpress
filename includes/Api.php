@@ -103,9 +103,10 @@ class Api {
 			);
 		}
 
-		$provided_key_hash = wc_api_hash( $_SERVER['PHP_AUTH_USER'] );
-		if ( ! hash_equals( $row->consumer_key, $provided_key_hash ) ||
-			! hash_equals( $row->consumer_secret, $_SERVER['PHP_AUTH_PW'] ) ) {
+		$provided_key    = sanitize_text_field( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) );
+		$provided_secret = sanitize_text_field( wp_unslash( $_SERVER['PHP_AUTH_PW'] ) );
+		if ( ! hash_equals( $row->consumer_key, wc_api_hash( $provided_key ) ) ||
+			! hash_equals( $row->consumer_secret, $provided_secret ) ) {
 			return new \WP_Error(
 				'printeers_unauthorized',
 				__( 'Invalid credentials.', 'printeers' ),
