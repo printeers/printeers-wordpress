@@ -32,7 +32,7 @@
 		</p>
 
 		<form method="post">
-			<?php echo $nonce_field; ?>
+			<?php wp_nonce_field( 'printeers_disconnect', 'printeers_disconnect_nonce' ); ?>
 			<button type="submit" name="printeers_disconnect" class="printeers-text-button">
 				<span class="dashicons dashicons-dismiss"></span>
 				<?php esc_html_e( 'Disconnect', 'printeers' ); ?>
@@ -49,7 +49,7 @@
 		<p><?php esc_html_e( 'Connect your WooCommerce store to Printeers to start selling print-on-demand products.', 'printeers' ); ?></p>
 
 		<form method="post">
-			<?php echo $connect_nonce_field; ?>
+			<?php wp_nonce_field( 'printeers_connect', 'printeers_connect_nonce' ); ?>
 			<button type="submit" name="printeers_connect" class="button button-primary button-hero">
 				<?php esc_html_e( 'Connect to Printeers', 'printeers' ); ?>
 			</button>
