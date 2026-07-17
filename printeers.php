@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Printeers: Print on demand
- * Plugin URI: https://printeers.com
+ * Plugin URI: https://printeers.com/integrations/woocommerce
  * Description: Connect your WooCommerce store to Printeers for print-on-demand fulfillment.
  * Version: 1.0.0
  * Author: Printeers
