@@ -1,4 +1,4 @@
-=== Printeers ===
+=== Printeers: Print on demand ===
 Contributors: printeers
 Tags: print-on-demand, fulfillment, woocommerce, dropshipping
 Requires at least: 6.7
