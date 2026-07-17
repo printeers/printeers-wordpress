@@ -1,12 +1,12 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit; ?>
 
 <div class="wrap printeers-admin">
-	<h1>Printeers</h1>
+	<h1><?php esc_html_e( 'Printeers', 'printeers' ); ?></h1>
 
 	<?php if ( ! empty( $disconnect_failed ) ) : ?>
 		<div class="notice notice-error">
-			<p>Could not disconnect from Printeers.<?php if ( '' !== $disconnect_error ) : ?> <?php echo esc_html( $disconnect_error ); ?><?php endif; ?></p>
-			<p>Your store is still connected. Please try again in a moment.</p>
+			<p><?php esc_html_e( 'Could not disconnect from Printeers.', 'printeers' ); ?><?php if ( '' !== $disconnect_error ) : ?> <?php echo esc_html( $disconnect_error ); ?><?php endif; ?></p>
+			<p><?php esc_html_e( 'Your store is still connected. Please try again in a moment.', 'printeers' ); ?></p>
 		</div>
 	<?php endif; ?>
 
@@ -14,23 +14,28 @@
 
 		<div class="printeers-status printeers-status--connected">
 			<span class="dashicons dashicons-yes-alt"></span>
-			<strong>Connected to Printeers</strong>
+			<strong><?php esc_html_e( 'Connected to Printeers', 'printeers' ); ?></strong>
 		</div>
 
 		<?php if ( $store_url ) : ?>
-			<p>Store URL: <code><?php echo esc_html( $store_url ); ?></code></p>
+			<p><?php esc_html_e( 'Store URL:', 'printeers' ); ?> <code><?php echo esc_html( $store_url ); ?></code></p>
 		<?php endif; ?>
 
 		<p>
-			Manage your store in the
-			<a href="<?php echo esc_url( $dashboard_url ); ?>" target="_blank">Printeers Dashboard</a>.
+			<?php
+			printf(
+				/* translators: %s: link to the Printeers Dashboard. */
+				esc_html__( 'Manage your store in the %s.', 'printeers' ),
+				'<a href="' . esc_url( $dashboard_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Printeers Dashboard', 'printeers' ) . '</a>'
+			);
+			?>
 		</p>
 
 		<form method="post">
 			<?php echo $nonce_field; ?>
 			<button type="submit" name="printeers_disconnect" class="printeers-text-button">
 				<span class="dashicons dashicons-dismiss"></span>
-				Disconnect
+				<?php esc_html_e( 'Disconnect', 'printeers' ); ?>
 			</button>
 		</form>
 
@@ -38,13 +43,13 @@
 
 		<div class="printeers-status printeers-status--disconnected">
 			<span class="dashicons dashicons-warning"></span>
-			<strong>Not connected</strong>
+			<strong><?php esc_html_e( 'Not connected', 'printeers' ); ?></strong>
 		</div>
 
-		<p>Connect your WooCommerce store to Printeers to start selling print-on-demand products.</p>
+		<p><?php esc_html_e( 'Connect your WooCommerce store to Printeers to start selling print-on-demand products.', 'printeers' ); ?></p>
 
 		<a href="<?php echo esc_url( $connect_url ); ?>" class="button button-primary button-hero">
-			Connect to Printeers
+			<?php esc_html_e( 'Connect to Printeers', 'printeers' ); ?>
 		</a>
 
 	<?php endif; ?>

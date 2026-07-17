@@ -37,7 +37,7 @@ class Connect {
 		$stored_nonce = get_option( 'printeers_connect_nonce', '' );
 
 		if ( empty( $stored_nonce ) || ! hash_equals( $stored_nonce, $nonce ) ) {
-			return array( 'error' => 'Invalid or expired nonce.' );
+			return array( 'error' => __( 'Invalid or expired nonce.', 'printeers' ) );
 		}
 
 		// Clear the nonce so it can't be reused.
@@ -133,7 +133,12 @@ class Connect {
 		$code = wp_remote_retrieve_response_code( $response );
 		if ( $code < 200 || $code >= 300 ) {
 			$message = wp_remote_retrieve_response_message( $response );
-			return new \WP_Error( 'printeers_disconnect_error', trim( "Printeers returned HTTP $code $message" ) );
+			return new \WP_Error( 'printeers_disconnect_error', trim( sprintf(
+				/* translators: 1: HTTP status code, 2: HTTP status message. */
+				__( 'Printeers returned HTTP %1$s %2$s', 'printeers' ),
+				$code,
+				$message
+			) ) );
 		}
 
 		return true;
@@ -158,7 +163,7 @@ class Connect {
 		// an admin user is required for webhook management.
 		$admins = get_users( array( 'role' => 'administrator', 'number' => 1, 'orderby' => 'ID', 'order' => 'ASC' ) );
 		if ( empty( $admins ) ) {
-			return new \WP_Error( 'printeers_no_admin', 'No administrator user found.' );
+			return new \WP_Error( 'printeers_no_admin', __( 'No administrator user found.', 'printeers' ) );
 		}
 
 		$data = array(
@@ -172,7 +177,7 @@ class Connect {
 
 		$inserted = $wpdb->insert( $wpdb->prefix . 'woocommerce_api_keys', $data );
 		if ( ! $inserted ) {
-			return new \WP_Error( 'printeers_key_error', 'Failed to create WooCommerce API keys.' );
+			return new \WP_Error( 'printeers_key_error', __( 'Failed to create WooCommerce API keys.', 'printeers' ) );
 		}
 
 		update_option( 'printeers_api_key_id', $wpdb->insert_id );
@@ -205,7 +210,12 @@ class Connect {
 		$code = wp_remote_retrieve_response_code( $response );
 		if ( $code !== 200 ) {
 			$body = wp_remote_retrieve_body( $response );
-			return new \WP_Error( 'printeers_callback_error', "Printeers returned HTTP $code: $body" );
+			return new \WP_Error( 'printeers_callback_error', sprintf(
+				/* translators: 1: HTTP status code, 2: response body. */
+				__( 'Printeers returned HTTP %1$s: %2$s', 'printeers' ),
+				$code,
+				$body
+			) );
 		}
 
 		return true;

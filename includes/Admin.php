@@ -16,8 +16,8 @@ class Admin {
 
 	public static function add_menu_page() {
 		add_menu_page(
-			'Printeers',
-			'Printeers',
+			__( 'Printeers', 'printeers' ),
+			__( 'Printeers', 'printeers' ),
 			'manage_woocommerce',
 			'printeers',
 			array( __CLASS__, 'render_page' ),

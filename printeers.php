@@ -35,6 +35,12 @@ require_once PRINTEERS_PLUGIN_DIR . 'includes/Admin.php';
 require_once PRINTEERS_PLUGIN_DIR . 'includes/Connect.php';
 require_once PRINTEERS_PLUGIN_DIR . 'includes/Api.php';
 
+add_action( 'before_woocommerce_init', function () {
+	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+	}
+} );
+
 function printeers_init() {
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		add_action( 'admin_notices', function () {

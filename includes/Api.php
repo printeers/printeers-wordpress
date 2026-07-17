@@ -55,7 +55,7 @@ class Api {
 		if ( ! is_ssl() ) {
 			return new \WP_Error(
 				'printeers_insecure_transport',
-				'HTTPS is required for this endpoint.',
+				__( 'HTTPS is required for this endpoint.', 'printeers' ),
 				array( 'status' => 426 )
 			);
 		}
@@ -63,7 +63,7 @@ class Api {
 		if ( empty( $_SERVER['PHP_AUTH_USER'] ) || empty( $_SERVER['PHP_AUTH_PW'] ) ) {
 			return new \WP_Error(
 				'printeers_unauthorized',
-				'Authentication required.',
+				__( 'Authentication required.', 'printeers' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -72,7 +72,7 @@ class Api {
 		if ( $key_id <= 0 ) {
 			return new \WP_Error(
 				'printeers_unauthorized',
-				'Printeers plugin is not connected.',
+				__( 'Printeers plugin is not connected.', 'printeers' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -85,7 +85,7 @@ class Api {
 		if ( ! $row ) {
 			return new \WP_Error(
 				'printeers_unauthorized',
-				'API key not found.',
+				__( 'API key not found.', 'printeers' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -95,7 +95,7 @@ class Api {
 			! hash_equals( $row->consumer_secret, $_SERVER['PHP_AUTH_PW'] ) ) {
 			return new \WP_Error(
 				'printeers_unauthorized',
-				'Invalid credentials.',
+				__( 'Invalid credentials.', 'printeers' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -134,7 +134,7 @@ class Api {
 
 		if ( empty( $posts ) ) {
 			return new \WP_REST_Response(
-				array( 'message' => 'Product not found.' ),
+				array( 'message' => __( 'Product not found.', 'printeers' ) ),
 				404
 			);
 		}
