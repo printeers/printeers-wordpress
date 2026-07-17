@@ -11,7 +11,25 @@ class Admin {
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'add_menu_page' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_styles' ) );
+		add_action( 'admin_init', array( __CLASS__, 'handle_connect' ) );
 		add_action( 'admin_init', array( __CLASS__, 'handle_disconnect' ) );
+	}
+
+	public static function handle_connect() {
+		if ( ! isset( $_POST['printeers_connect'] ) ) {
+			return;
+		}
+		if ( ! isset( $_POST['printeers_connect_nonce'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['printeers_connect_nonce'] ) ), 'printeers_connect' ) ) {
+			return;
+		}
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		// Not wp_safe_redirect: the Dashboard is an external host by design.
+		wp_redirect( Connect::get_connect_url() );
+		exit;
 	}
 
 	public static function add_menu_page() {
@@ -42,7 +60,8 @@ class Admin {
 		if ( ! isset( $_POST['printeers_disconnect'] ) ) {
 			return;
 		}
-		if ( ! wp_verify_nonce( $_POST['printeers_disconnect_nonce'], 'printeers_disconnect' ) ) {
+		if ( ! isset( $_POST['printeers_disconnect_nonce'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['printeers_disconnect_nonce'] ) ), 'printeers_disconnect' ) ) {
 			return;
 		}
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -72,11 +91,11 @@ class Admin {
 	}
 
 	public static function render_page() {
-		$connected     = get_option( 'printeers_connected', false );
-		$store_url     = get_option( 'printeers_store_url', '' );
-		$connect_url   = Connect::get_connect_url();
-		$dashboard_url = PRINTEERS_DASHBOARD_URL;
-		$nonce_field   = wp_nonce_field( 'printeers_disconnect', 'printeers_disconnect_nonce', true, false );
+		$connected           = get_option( 'printeers_connected', false );
+		$store_url           = get_option( 'printeers_store_url', '' );
+		$dashboard_url       = PRINTEERS_DASHBOARD_URL;
+		$nonce_field         = wp_nonce_field( 'printeers_disconnect', 'printeers_disconnect_nonce', true, false );
+		$connect_nonce_field = wp_nonce_field( 'printeers_connect', 'printeers_connect_nonce', true, false );
 
 		$disconnect_failed = isset( $_GET['disconnect_error'] );
 		$disconnect_error  = '';

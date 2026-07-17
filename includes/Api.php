@@ -21,7 +21,7 @@ class Api {
 		register_rest_route( 'printeers/v1', '/connect-callback', array(
 			'methods'             => 'GET',
 			'callback'            => array( __CLASS__, 'handle_connect_callback' ),
-			'permission_callback' => '__return_true',
+			'permission_callback' => array( __CLASS__, 'require_ssl' ),
 			'args'                => array(
 				'nonce' => array(
 					'required'          => true,
@@ -46,18 +46,31 @@ class Api {
 	}
 
 	/**
-	 * Authenticate a request using the Printeers WooCommerce REST API key via
-	 * HTTP Basic Auth. WooCommerce's own REST auth only applies to requests
-	 * under the wc/* namespace, so routes under printeers/v1 must validate the
-	 * key ourselves against the entry created by Connect::create_api_keys().
+	 * The connect callback needs no authentication (the nonce is the
+	 * credential), but it must not run over plain HTTP since it triggers
+	 * credential generation.
 	 */
-	public static function authenticate_request() {
+	public static function require_ssl() {
 		if ( ! is_ssl() ) {
 			return new \WP_Error(
 				'printeers_insecure_transport',
 				__( 'HTTPS is required for this endpoint.', 'printeers' ),
 				array( 'status' => 426 )
 			);
+		}
+		return true;
+	}
+
+	/**
+	 * Authenticate a request using the Printeers WooCommerce REST API key via
+	 * HTTP Basic Auth. WooCommerce's own REST auth only applies to requests
+	 * under the wc/* namespace, so routes under printeers/v1 must validate the
+	 * key ourselves against the entry created by Connect::create_api_keys().
+	 */
+	public static function authenticate_request() {
+		$ssl = self::require_ssl();
+		if ( true !== $ssl ) {
+			return $ssl;
 		}
 
 		if ( empty( $_SERVER['PHP_AUTH_USER'] ) || empty( $_SERVER['PHP_AUTH_PW'] ) ) {

@@ -48,9 +48,12 @@
 
 		<p><?php esc_html_e( 'Connect your WooCommerce store to Printeers to start selling print-on-demand products.', 'printeers' ); ?></p>
 
-		<a href="<?php echo esc_url( $connect_url ); ?>" class="button button-primary button-hero">
-			<?php esc_html_e( 'Connect to Printeers', 'printeers' ); ?>
-		</a>
+		<form method="post">
+			<?php echo $connect_nonce_field; ?>
+			<button type="submit" name="printeers_connect" class="button button-primary button-hero">
+				<?php esc_html_e( 'Connect to Printeers', 'printeers' ); ?>
+			</button>
+		</form>
 
 	<?php endif; ?>
 </div>
