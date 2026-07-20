@@ -36,6 +36,15 @@ Data is only sent when you connect or disconnect the plugin. Both services are o
 3. Click "Connect to Printeers" and log in to your Printeers account.
 4. Create a store in the Printeers Dashboard to complete the setup.
 
+== Screenshots ==
+
+1. Create and sell custom phone cases and wearables: 800+ products, same day shipping, custom branding options.
+2. A case type for every lifestyle: tough, MagSafe-compatible, wallet, crossbody, clear soft and many more styles.
+3. Photorealistic mockups display your products from various angles and close ups.
+4. Fully branded customer experience: build your brand by adding custom items to your orders.
+5. Track your orders in the Printeers Dashboard: set up your shop, add products, track orders and more.
+6. Shipping in 24 hours: all orders placed before 16:00 CET are printed and shipped same day.
+
 == Changelog ==
 
 = 1.0.0 =
