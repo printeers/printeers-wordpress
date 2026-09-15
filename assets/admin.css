@@ -69,6 +69,13 @@
 	color: var(--printeers-original-orange);
 }
 
+/* Connected, but the stored connection belongs to another site (copied/moved site) */
+.printeers-admin .printeers-status--mismatch {
+	background: #fff5eb;
+	color: var(--printeers-original-orange);
+	border: 1px solid var(--printeers-original-orange);
+}
+
 /* Primary button (Connect to Printeers) */
 .printeers-admin .button-primary,
 .printeers-admin .button-primary.button-hero {

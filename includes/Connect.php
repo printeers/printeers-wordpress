@@ -87,7 +87,21 @@ class Connect {
 			}
 		}
 
-		// Remove the API key we created.
+		self::remove_local();
+
+		return true;
+	}
+
+	/**
+	 * Remove the local half of the connection only: the WooCommerce API key
+	 * created at connect and the plugin's connection options. Printeers is NOT
+	 * notified. This is for a site that was copied (or moved) from the
+	 * connected store: its options and API key still belong to the original
+	 * site, and telling Printeers to disconnect would pause that site's store.
+	 * Deleting the plugin (uninstall.php) does the same.
+	 */
+	public static function remove_local(): void {
+		$key_id = (int) get_option( 'printeers_api_key_id', 0 );
 		if ( $key_id ) {
 			global $wpdb;
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ) );
@@ -97,8 +111,32 @@ class Connect {
 		delete_option( 'printeers_store_url' );
 		delete_option( 'printeers_api_key_id' );
 		delete_option( 'printeers_connect_nonce' );
+	}
 
-		return true;
+	/**
+	 * Normalize a site URL for comparison, the same way the Printeers side
+	 * canonicalizes store URLs (see CanonicalizeStoreURL in the ipp monorepo):
+	 * host lower-cased, default port dropped, trailing slash trimmed, no
+	 * query, fragment or credentials. The scheme is forced to https so that a
+	 * site whose scheme changed still compares as the same site; a connected
+	 * store is always https anyway. Used to tell whether the stored connection
+	 * belongs to the site the plugin currently runs on.
+	 */
+	public static function normalize_url( string $url ): string {
+		$url   = trim( $url );
+		$parts = wp_parse_url( $url );
+		if ( ! is_array( $parts ) || empty( $parts['host'] ) ) {
+			return strtolower( $url );
+		}
+
+		$host = strtolower( $parts['host'] );
+		if ( ! empty( $parts['port'] ) && 443 !== (int) $parts['port'] ) {
+			$host .= ':' . (int) $parts['port'];
+		}
+
+		$path = isset( $parts['path'] ) ? rtrim( $parts['path'], '/' ) : '';
+
+		return 'https://' . $host . $path;
 	}
 
 	/**
@@ -117,7 +155,11 @@ class Connect {
 	}
 
 	/**
-	 * Tell the Printeers callback API to mark this store as disconnected.
+	 * Tell the Printeers callback API to disconnect this store. Besides the
+	 * store URL stored at connect time we send the URL of the site the plugin
+	 * runs on right now; Printeers refuses (HTTP 409) when the two are not the
+	 * same site, so a copied site cannot disconnect the original store. The
+	 * body must contain exactly these keys: the API rejects unknown ones.
 	 */
 	private static function notify_disconnect( string $store_url, string $consumer_secret ) {
 		$url = PRINTEERS_CALLBACK_URL . '/woocommerce/disconnect';
@@ -128,6 +170,7 @@ class Connect {
 			'body'    => wp_json_encode( array(
 				'store_url'       => $store_url,
 				'consumer_secret' => $consumer_secret,
+				'site_url'        => home_url(),
 			) ),
 		) );
 
@@ -138,12 +181,20 @@ class Connect {
 		$code = wp_remote_retrieve_response_code( $response );
 		if ( $code < 200 || $code >= 300 ) {
 			$message = wp_remote_retrieve_response_message( $response );
-			return new \WP_Error( 'printeers_disconnect_error', trim( sprintf(
+			$error   = trim( sprintf(
 				/* translators: 1: HTTP status code, 2: HTTP status message. */
 				__( 'Printeers returned HTTP %1$s %2$s', 'printeers' ),
 				$code,
 				$message
-			) ) );
+			) );
+			// The API explains a refusal in a plain-text body (e.g. which site
+			// the connection belongs to); show it. Tags are stripped in case a
+			// proxy answered with an HTML error page; the template escapes it.
+			$body = trim( wp_strip_all_tags( wp_remote_retrieve_body( $response ), true ) );
+			if ( '' !== $body ) {
+				$error .= ': ' . $body;
+			}
+			return new \WP_Error( 'printeers_disconnect_error', $error );
 		}
 
 		return true;
