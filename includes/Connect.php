@@ -68,18 +68,19 @@ class Connect {
 	}
 
 	/**
-	 * Disconnect from Printeers. Notifies Printeers first so the store is freed
-	 * for a future reconnect, then removes the local API key and connection
-	 * state. If Printeers can't be reached the local state is left intact so the
-	 * user can retry; otherwise the store would be stuck connected on the
-	 * Printeers side. Returns true on success or a WP_Error on failure.
+	 * Disconnect from Printeers. Notifies Printeers first so it pauses the
+	 * store and stops using this site's credentials, then removes the local
+	 * API key and connection state. If Printeers can't be reached the local
+	 * state is left intact so the user can retry; otherwise the store would be
+	 * stuck connected on the Printeers side. Returns true on success or a
+	 * WP_Error on failure.
 	 */
 	public static function disconnect() {
 		$key_id          = (int) get_option( 'printeers_api_key_id', 0 );
 		$consumer_secret = self::get_consumer_secret( $key_id );
 
 		// Only notify when we still have the credential Printeers needs to
-		// authenticate the request; otherwise there is nothing to free remotely.
+		// authenticate the request; otherwise there is nothing to pause remotely.
 		if ( $consumer_secret ) {
 			$result = self::notify_disconnect( get_option( 'printeers_store_url', home_url() ), $consumer_secret );
 			if ( is_wp_error( $result ) ) {
@@ -117,10 +118,11 @@ class Connect {
 	 * Normalize a site URL for comparison, the same way the Printeers side
 	 * canonicalizes store URLs (see CanonicalizeStoreURL in the ipp monorepo):
 	 * host lower-cased, default port dropped, trailing slash trimmed, no
-	 * query, fragment or credentials. The scheme is forced to https so that a
-	 * site whose scheme changed still compares as the same site; a connected
-	 * store is always https anyway. Used to tell whether the stored connection
-	 * belongs to the site the plugin currently runs on.
+	 * query, fragment or credentials. The scheme is kept: Printeers refuses a
+	 * disconnect from a non-https site, so an http site must count as another
+	 * site here too, or its admin gets a Disconnect that always fails instead
+	 * of the option to remove the connection locally. Used to tell whether the
+	 * stored connection belongs to the site the plugin currently runs on.
 	 */
 	public static function normalize_url( string $url ): string {
 		$url   = trim( $url );
@@ -129,14 +131,17 @@ class Connect {
 			return strtolower( $url );
 		}
 
+		$scheme       = strtolower( $parts['scheme'] ?? 'https' );
+		$default_port = 'http' === $scheme ? 80 : 443;
+
 		$host = strtolower( $parts['host'] );
-		if ( ! empty( $parts['port'] ) && 443 !== (int) $parts['port'] ) {
+		if ( ! empty( $parts['port'] ) && $default_port !== (int) $parts['port'] ) {
 			$host .= ':' . (int) $parts['port'];
 		}
 
 		$path = isset( $parts['path'] ) ? rtrim( $parts['path'], '/' ) : '';
 
-		return 'https://' . $host . $path;
+		return $scheme . '://' . $host . $path;
 	}
 
 	/**
