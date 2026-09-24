@@ -13,6 +13,7 @@ class Admin {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_styles' ) );
 		add_action( 'admin_init', array( __CLASS__, 'handle_connect' ) );
 		add_action( 'admin_init', array( __CLASS__, 'handle_disconnect' ) );
+		add_action( 'admin_init', array( __CLASS__, 'handle_remove_local' ) );
 	}
 
 	public static function handle_connect() {
@@ -90,13 +91,47 @@ class Admin {
 		exit;
 	}
 
+	/**
+	 * Remove a connection that belongs to another site (the admin page offers
+	 * this when the stored store URL is not this site's URL, i.e. the site was
+	 * copied or moved). Only local state is removed; Printeers is not told, so
+	 * the original site's store stays connected. Afterwards the page shows
+	 * "Not connected" and Connect works as a fresh connect for this site.
+	 */
+	public static function handle_remove_local() {
+		if ( ! isset( $_POST['printeers_remove_local'] ) ) {
+			return;
+		}
+		if ( ! isset( $_POST['printeers_remove_local_nonce'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['printeers_remove_local_nonce'] ) ), 'printeers_remove_local' ) ) {
+			return;
+		}
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		Connect::remove_local();
+
+		wp_safe_redirect( admin_url( 'admin.php?page=printeers&removed=1' ) );
+		exit;
+	}
+
 	public static function render_page() {
-		$connected     = get_option( 'printeers_connected', false );
-		$store_url     = get_option( 'printeers_store_url', '' );
+		$connected     = (bool) get_option( 'printeers_connected', false );
+		$store_url     = (string) get_option( 'printeers_store_url', '' );
+		$site_url      = home_url();
 		$dashboard_url = PRINTEERS_DASHBOARD_URL;
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display-only flag, no state change.
+		// The stored store URL is the site's URL at connect time. If it is
+		// another site now, the database was copied (or the site moved) and
+		// the connection is the other site's: a Disconnect from here would pause
+		// that store. Compare normalized, as the Printeers side does.
+		$site_mismatch = $connected && '' !== $store_url && Connect::normalize_url( $store_url ) !== Connect::normalize_url( $site_url );
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- display-only flags, no state change.
 		$disconnect_failed = isset( $_GET['disconnect_error'] );
+		$removed           = isset( $_GET['removed'] );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		$disconnect_error  = '';
 		if ( $disconnect_failed ) {
 			$transient_key = 'printeers_disconnect_error_' . get_current_user_id();
